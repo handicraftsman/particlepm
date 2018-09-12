@@ -1,0 +1,5 @@
+/.particlepm
+/dist
+/*.so
+/*.o
+/particlepm
