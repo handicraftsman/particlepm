@@ -402,7 +402,6 @@ void PPM::GitRepo::fetch() {
   std::hash<std::string> hasher;
   size_t hash = hasher("git-" + url_);
 
-  std::cout << "asdf" << std::endl;
   std::ofstream f(PPM::Utils::to_path(std::vector<std::string>{ ".particlepm", "packages.txt" }), std::ios_base::app);
   f << "git-" << std::to_string(hash) << std::endl;
   f.close();
@@ -445,6 +444,8 @@ std::string PPM::PkgConfig::flags(const std::string& target) {
   if (st.code != 0) {
     throw std::runtime_error("Unable to find `" + target + "` pkg-config package!");
   }
+  st.data.erase(std::remove(st.data.begin(), st.data.end(), '\r'), st.data.end());
+  st.data.erase(std::remove(st.data.begin(), st.data.end(), '\n'), st.data.end());
   return st.data;
 }
 

@@ -1,6 +1,6 @@
 # ParticlePM
 
-A package manager and build system for C/++ applications and libraries
+A package manager and build system for C/++ applications and libraries.
 
 Its main goal is to allow creating program distributions which then can be
 easily deployed to the other machine without installing any self-written dependencies.
