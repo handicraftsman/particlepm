@@ -15,9 +15,10 @@ include_directories(${CMAKE_CURRENT_LIST_DIR})
 
 add_library(libparticlepm SHARED ${CMAKE_CURRENT_LIST_DIR}/particlepm.cpp)
 set_target_properties(libparticlepm PROPERTIES OUTPUT_NAME particlepm)
+target_link_libraries(libparticlepm dl)
 
 add_executable(particlepm ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
-target_link_libraries(libparticlepm)
+target_link_libraries(particlepm libparticlepm dl)
 
 install(
   TARGETS libparticlepm particlepm
