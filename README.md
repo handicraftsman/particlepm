@@ -44,7 +44,3 @@ PPM_PACKAGE(p) {
   exe->depends(lib);
 }
 ```
-
-## Running built programs
-
-You should run built programs with `LD_LIBRARY_PATH=/path/to/dist/` specified as `-Wl,rpath=` is not used.

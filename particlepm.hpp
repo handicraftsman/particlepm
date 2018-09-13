@@ -274,7 +274,7 @@ namespace PPM {
       Library,
     };
 
-    Target(const std::string& name, Type type);
+    Target(const std::string& name, const std::string& dir, Type type);
 
     void depends(const TargetPtr& other);
     void build();
@@ -301,6 +301,7 @@ namespace PPM {
 
     Type type_;
     std::string name_;
+    std::string dir_;
     std::string c_;
     std::string cpp_;
     std::string c_flags_;

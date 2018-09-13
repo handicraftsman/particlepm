@@ -651,13 +651,13 @@ void PPM::Package::build() {
 }
 
 PPM::TargetPtr PPM::Package::executable(const std::string& name) {
-  PPM::TargetPtr t(new PPM::Target(name, PPM::Target::Type::Executable));
+  PPM::TargetPtr t(new PPM::Target(name, pkg_dir(), PPM::Target::Type::Executable));
   targets[name] = t;
   return t;
 }
 
 PPM::TargetPtr PPM::Package::library(const std::string& name) {
-  PPM::TargetPtr t(new PPM::Target(name, PPM::Target::Type::Library));
+  PPM::TargetPtr t(new PPM::Target(name, pkg_dir(), PPM::Target::Type::Library));
   targets[name] = t;
   return t;
 }
@@ -666,11 +666,12 @@ PPM::TargetPtr PPM::Package::library(const std::string& name) {
  * Target
  */
 
-PPM::Target::Target(const std::string& name, PPM::Target::Type type)
+PPM::Target::Target(const std::string& name, const std::string& dir, PPM::Target::Type type)
 : marked(false)
 , has_cpp(false)
 , type_(type)
 , name_(name)
+, dir_(dir)
 , c_("c11")
 , cpp_("c++11")
 , c_flags_("")
@@ -699,6 +700,12 @@ void PPM::Target::build() {
     }
     file->built = true;
     auto do_build = [&] () {
+      char* p_ = getcwd(NULL, 1024);
+      std::string p(p_);
+      free(p_);
+
+      PPM::Utils::chdir(dir_);
+
       std::string flags;
       std::string std;
       if (file->compiler == PPM_CC) {
@@ -708,11 +715,13 @@ void PPM::Target::build() {
         flags = cpp_flags_;
         std = cpp_;
       }
-      PPM::Utils::ExecStatus st = PPM::Utils::exec(file->compiler + " " + flags + " -fPIC -std=" + std + " -c " + file->ifile + " -o " + file->ofile);
+      PPM::Utils::ExecStatus st = PPM::Utils::exec(file->compiler + " " + flags + " -Wl,-rpath='$ORIGIN' -fPIC -std=" + std + " -c " + file->ifile + " -o " + file->ofile);
       if (st.code != 0) {
         std::cerr << st.data << std::endl;
         ::exit(st.code);
       }
+
+      PPM::Utils::chdir(p);
     };
     if (::access(file->ofile.c_str(), 0) == 0) {
       struct stat a, b;
@@ -737,9 +746,9 @@ void PPM::Target::build() {
 
   PPM::Utils::ExecStatus st;
   if (type_ == PPM::Target::Type::Executable) {
-    st = PPM::Utils::exec(compiler + " " + dbg + " -fPIC -o " + out + " " + filenames + " " + cpp_flags_ + " " + c_flags_);
+    st = PPM::Utils::exec(compiler + " " + dbg + " -Wl,-rpath='$ORIGIN' -fPIC -o " + out + " " + filenames + " " + cpp_flags_ + " " + c_flags_);
   } else {
-    st = PPM::Utils::exec(compiler + " " + dbg + " -rdynamic -shared -fPIC -o " + out + " " + filenames + " " + cpp_flags_ + " " + c_flags_);
+    st = PPM::Utils::exec(compiler + " " + dbg + " -rdynamic -shared -Wl,-rpath='$ORIGIN' -fPIC -o " + out + " " + filenames + " " + cpp_flags_ + " " + c_flags_);
   }
   if (st.code != 0) {
     std::cerr << st.data << std::endl;
@@ -774,7 +783,8 @@ void PPM::Target::cpp(const std::string& value) {
 void PPM::Target::c_files(const std::vector<std::string>& filenames) {
   std::string suffix = (PPM::dev == true ? ".dev.o" : ".o");
   for (const std::string& filename : filenames) {
-    files_.insert(PPM::FilePtr(new PPM::File(filename, filename + suffix, PPM_CC)));
+    std::string f = dir_ + "/" + filename;
+    files_.insert(PPM::FilePtr(new PPM::File(f, f + suffix, PPM_CC)));
   }
 }
 
@@ -782,7 +792,8 @@ void PPM::Target::cpp_files(const std::vector<std::string>& filenames) {
   std::string suffix = (PPM::dev == true ? ".dev.o" : ".o");
   has_cpp = true;
   for (const std::string& filename : filenames) {
-    files_.insert(PPM::FilePtr(new PPM::File(filename, filename + suffix, PPM_CXX)));
+    std::string f = dir_ + "/" + filename;
+    files_.insert(PPM::FilePtr(new PPM::File(f, f + suffix, PPM_CXX)));
   }
 }
 
