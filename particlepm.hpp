@@ -277,7 +277,7 @@ namespace PPM {
     Target(const std::string& name, const std::string& dir, Type type);
 
     void depends(const TargetPtr& other);
-    void build();
+    virtual void build();
 
     std::string name();
     void name(const std::string& value);
@@ -307,6 +307,7 @@ namespace PPM {
     std::string c_flags_;
     std::string cpp_flags_;
     std::set<FilePtr> files_;
+    bool is_dynamic_;
   };
 
   /*

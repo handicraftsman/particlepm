@@ -16,7 +16,7 @@ using namespace PPM::Utils;
 
 PPM_PACKAGE(p) {
   p->name("particlepm");
-  p->version(PPM::Version("v0.1.0"));
+  p->version(PPM::Version("v0.1.1"));
   p->description("A package manager and build system for C/++ applications and libraries");
   p->github(PPM::GitHub("handicraftsman", "particlepm"));
   p->license(PPM::License("MIT", "https://github.com/handicraftsman/particlepm/blob/master/LICENSE.txt"));
@@ -33,14 +33,28 @@ PPM_PACKAGE(p) {
   lib->cpp_files(std::vector<std::string> {
     "particlepm.cpp"
   });
-  lib->cpp_flags(flagcat({"-ldl", ("-I" + p->pkg_dir())}));
+  lib->cpp_flags(
+    flagcat({
+      "-ldl",
+
+      ("-I" + p->pkg_dir())
+    })
+  );
 
   PPM::TargetPtr exe = p->executable("particlepm");
   exe->cpp("c++17");
   exe->cpp_files(std::vector<std::string> {
     "main.cpp"
   });
-  exe->cpp_flags(flagcat({("-L" + PPM::dist_dir), "-lparticlepm", ("-I" + p->pkg_dir())}));
+  exe->cpp_flags(
+    flagcat({
+      ("-L" + PPM::dist_dir),
+
+      "-lparticlepm",
+
+      ("-I" + p->pkg_dir())
+    })
+  );
   exe->depends(lib);
 }
 ```

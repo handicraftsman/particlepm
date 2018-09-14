@@ -92,6 +92,7 @@ int main(int argc, char** argv) {
     exit(2);
   }
   std::string arg(argv[1]);
+
   if (arg == "build") {
     build(PPM::Package::from_path("./package.cpp", "./"));
   } else if (arg == "build-dev") {

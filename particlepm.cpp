@@ -275,6 +275,7 @@ void PPM::GitHub::fetch() {
   b = "v" + std::to_string(v.vmajor()) + "." + std::to_string(v.vminor()) + "." + std::to_string(v.vpatch());
 
   PPM::Utils::exec("git checkout " + b);
+  PPM::Utils::exec("git submodule update --recursive --remote");
   PPM::Utils::chdir(p);
 
   std::string ppath = dir() + "/package.cpp";
@@ -394,6 +395,7 @@ void PPM::GitRepo::fetch() {
   b = "v" + std::to_string(v.vmajor()) + "." + std::to_string(v.vminor()) + "." + std::to_string(v.vpatch());
 
   PPM::Utils::exec("git checkout " + b);
+  PPM::Utils::exec("git submodule update --recursive --remote");
   PPM::Utils::chdir(p);
 
   std::string ppath = dir() + "/package.cpp";
@@ -676,6 +678,7 @@ PPM::Target::Target(const std::string& name, const std::string& dir, PPM::Target
 , cpp_("c++11")
 , c_flags_("")
 , cpp_flags_("")
+, is_dynamic_(true)
 {}
 
 void PPM::Target::depends(const PPM::TargetPtr& other) {
@@ -744,11 +747,13 @@ void PPM::Target::build() {
     filenames += (" " + file->ofile);
   }
 
+  std::string lt = is_dynamic_ ? "-rdynamic" : "";
+
   PPM::Utils::ExecStatus st;
   if (type_ == PPM::Target::Type::Executable) {
     st = PPM::Utils::exec(compiler + " " + dbg + " -Wl,-rpath='$ORIGIN' -fPIC -o " + out + " " + filenames + " " + cpp_flags_ + " " + c_flags_);
   } else {
-    st = PPM::Utils::exec(compiler + " " + dbg + " -rdynamic -shared -Wl,-rpath='$ORIGIN' -fPIC -o " + out + " " + filenames + " " + cpp_flags_ + " " + c_flags_);
+    st = PPM::Utils::exec(compiler + " " + dbg + " " + lt + " -shared -Wl,-rpath='$ORIGIN' -fPIC -o " + out + " " + filenames + " " + cpp_flags_ + " " + c_flags_);
   }
   if (st.code != 0) {
     std::cerr << st.data << std::endl;
