@@ -122,7 +122,6 @@ static void cp_libs(PPM::PackagePtr libs) {
         exit(1);
       }
       std::stringstream ss(st.data);
-      std::string path;
       ss >> path;
     }    
     boost::remove_erase(path, '\r');
