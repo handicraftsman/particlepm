@@ -21,7 +21,18 @@ PPM_PACKAGE(p) {
   lib->name("particlepm");
   lib->cpp("c++17");
   lib->cpp_files(std::vector<std::string> {
-    "particlepm.cpp"
+    "particlepm/dependency.cpp",
+    "particlepm/github.cpp",
+    "particlepm/libdeclarations.cpp",
+    "particlepm/package.cpp",
+    "particlepm/selector.cpp",
+    "particlepm/utils.cpp",
+    "particlepm/file.cpp",
+    "particlepm/gitrepo.cpp",
+    "particlepm/license.cpp",
+    "particlepm/pkgconfig.cpp",
+    "particlepm/target.cpp",
+    "particlepm/version.cpp"
   });
   lib->cpp_flags(
     flagcat({

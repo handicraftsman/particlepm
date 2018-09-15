@@ -15,7 +15,10 @@ find_package(Boost 1.65 REQUIRED COMPONENTS program_options)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
-add_library(libparticlepm SHARED ${CMAKE_CURRENT_LIST_DIR}/particlepm.cpp)
+file(GLOB ppm_SRC ${CMAKE_CURRENT_LIST_DIR}/particlepm/*.cpp)
+file(GLOB ppm_HDR ${CMAKE_CURRENT_LIST_DIR}/particlepm/*.hpp)
+
+add_library(libparticlepm SHARED ${ppm_SRC})
 set_target_properties(libparticlepm PROPERTIES OUTPUT_NAME particlepm)
 target_link_libraries(libparticlepm dl)
 
@@ -31,4 +34,9 @@ install(
 install(
   FILES ${CMAKE_CURRENT_LIST_DIR}/particlepm.hpp
   DESTINATION include
+)
+
+install(
+  FILES ${ppm_HDR}
+  DESTINATION include/particlepm
 )
