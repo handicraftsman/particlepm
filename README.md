@@ -16,7 +16,7 @@ using namespace PPM::Utils;
 
 PPM_PACKAGE(p) {
   p->name("particlepm");
-  p->version(PPM::Version("v0.1.2"));
+  p->version(PPM::Version("v0.1.3"));
   p->description("A package manager and build system for C/++ applications and libraries");
   p->github(PPM::GitHub("handicraftsman", "particlepm"));
   p->license(PPM::License("MIT", "https://github.com/handicraftsman/particlepm/blob/master/LICENSE.txt"));
