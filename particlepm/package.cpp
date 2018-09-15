@@ -33,7 +33,7 @@ PPM::PackagePtr PPM::Package::from_path(const std::string& cpppath, const std::s
   std::string opath = PPM::Utils::to_path(std::vector<std::string>{ ".particlepm", "pkg-" + std::to_string(hash) + ".so" });
 
   auto build = [&] () {
-    PPM::Utils::ExecStatus st = PPM::Utils::exec(PPM_CXX + " -std=c++17 -fPIC -g -I. -L. -lparticlepm -Wl,-rpath=./ -fPIC -shared " + cpppath + " -o " + opath);
+    PPM::Utils::ExecStatus st = PPM::Utils::exec(PPM_CXX + " " + PPM::envflags + " -std=c++17 -fPIC -g -I. -L. -lparticlepm -Wl,-rpath=./ -fPIC -shared " + cpppath + " -o " + opath);
     if (st.code != 0) {
       std::cerr << st.data;
       throw std::runtime_error("Unable to compile package file! (" + cpppath + ")");

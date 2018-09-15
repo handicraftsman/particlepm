@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 extern "C" {
+  #include <limits.h>
   #include <unistd.h>
   #include <sys/stat.h>
 }
@@ -16,10 +17,35 @@ extern "C" {
 
 #include <boost/program_options.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
 
 namespace po = boost::program_options;
+namespace pt = boost::property_tree;
 
 std::map<std::string, PPM::PackagePtr> packages;
+
+static void load_env(const std::string& envpath) {
+  pt::ptree tree;
+  pt::read_json(envpath, tree);
+
+  for (const auto& p : tree.get_child("library_dirs")) {
+    PPM::libdirs.insert(p.second.data());
+  }
+
+  for (const auto& p : tree.get_child("include_dirs")) {
+    PPM::incldirs.insert(p.second.data());
+  }
+
+  for (const std::string& dir : PPM::libdirs) {
+    PPM::envflags += (" -L" + dir);
+  }
+
+  for (const std::string& dir : PPM::incldirs) {
+    PPM::envflags += (" -I" + dir);
+  }
+}
 
 static void build_pkg(PPM::PackagePtr pkg) {
   if (!pkg || pkg->marked) {
@@ -74,14 +100,31 @@ static void cp_libs(PPM::PackagePtr libs) {
   PPM::Utils::mkdir(PPM::Utils::to_path(std::vector<std::string> { "dist" }));
 
   for (std::string lib : PPM::libs) {
-    PPM::Utils::ExecStatus st = PPM::Utils::exec("echo \"$(ldconfig -p | grep lib" + lib + ".so | tr ' ' '\\n' | grep /)\"");
-    if (st.code != 0) {
-      std::cerr << st.data << std::endl;
-      exit(1);
-    }
-    std::stringstream ss(st.data);
     std::string path;
-    ss >> path;
+    bool found = false;
+    for (const std::string& dir : PPM::libdirs) {
+      std::string p = dir + "/lib" + lib + ".so";
+      if (std::ifstream(p).good()) {
+        char buf[PATH_MAX];
+        if (::realpath(p.c_str(), buf) == NULL) {
+          perror("cp_libs{realpath}");
+          exit(1);
+        }
+        path = std::string(buf);
+        found = true;
+      }
+    }
+    PPM::Utils::ExecStatus st;
+    if (!found) {
+      st = PPM::Utils::exec("echo \"$(ldconfig -p | grep lib" + lib + ".so | tr ' ' '\\n' | grep /)\"");
+      if (st.code != 0) {
+        std::cerr << st.data << std::endl;
+        exit(1);
+      }
+      std::stringstream ss(st.data);
+      std::string path;
+      ss >> path;
+    }    
     boost::remove_erase(path, '\r');
     boost::remove_erase(path, '\n');
     std::string to = PPM::Utils::to_path(std::vector<std::string> { "dist", path.substr(path.find_last_of("/\\") + 1) });
@@ -143,12 +186,11 @@ int main(int argc, char** argv) {
   global.add_options()
     ("help", "show this message")
     ("command", po::value<std::string>(), "command to execute")
-    ("subargs", po::value<std::vector<std::string>>(), "arguments for command");
+    ("env", po::value<std::string>(), "environment config path");
 
   po::positional_options_description pos;
   pos
-    .add("command", 1)
-    .add("subargs", -1);
+    .add("command", 1);
 
   po::variables_map vm;
 
@@ -182,6 +224,11 @@ int main(int argc, char** argv) {
     print_help();
   }
 
+  if (vm.count("env")) {
+    std::string envpath = vm["env"].as<std::string>();
+    load_env(envpath);
+  }
+
   std::string cmd = vm["command"].as<std::string>();
 
   if (cmd == "build") {
@@ -193,6 +240,7 @@ int main(int argc, char** argv) {
     cp_libs(PPM::Package::from_path("./package.cpp", "./"));
   } else if (cmd == "fetch") {
     fetch(PPM::Package::from_path("./package.cpp", "./"));
+  } else if (cmd == "dummy") {
   } else {
     throw std::runtime_error("Unknown command: " + cmd);
   }

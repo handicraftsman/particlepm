@@ -12,6 +12,9 @@ namespace PPM {
   extern int fetched;
   extern std::string dist_dir;
   extern std::set<std::string> libs;
+  extern std::set<std::string> libdirs;
+  extern std::set<std::string> incldirs;
+  extern std::string envflags;
 
   /*
    * Declarations

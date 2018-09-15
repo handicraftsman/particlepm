@@ -52,7 +52,7 @@ void PPM::Target::build() {
         flags = cpp_flags_;
         std = cpp_;
       }
-      PPM::Utils::ExecStatus st = PPM::Utils::exec(file->compiler + " " + flags + " -Wl,-rpath='$ORIGIN' -fPIC -std=" + std + " -c " + file->ifile + " -o " + file->ofile);
+      PPM::Utils::ExecStatus st = PPM::Utils::exec(file->compiler + " " + PPM::envflags + " " + flags + " -Wl,-rpath='$ORIGIN' -fPIC -std=" + std + " -c " + file->ifile + " -o " + file->ofile);
       if (st.code != 0) {
         std::cerr << st.data << std::endl;
         ::exit(st.code);
@@ -85,9 +85,9 @@ void PPM::Target::build() {
 
   PPM::Utils::ExecStatus st;
   if (type_ == PPM::Target::Type::Executable) {
-    st = PPM::Utils::exec(compiler + " " + dbg + " -Wl,-rpath='$ORIGIN' -fPIC -o " + out + " " + filenames + " " + cpp_flags_ + " " + c_flags_);
+    st = PPM::Utils::exec(compiler + " " + dbg + " " + PPM::envflags + " -Wl,-rpath='$ORIGIN' -fPIC -o " + out + " " + filenames + " " + cpp_flags_ + " " + c_flags_);
   } else {
-    st = PPM::Utils::exec(compiler + " " + dbg + " " + lt + " -shared -Wl,-rpath='$ORIGIN' -fPIC -o " + out + " " + filenames + " " + cpp_flags_ + " " + c_flags_);
+    st = PPM::Utils::exec(compiler + " " + dbg + " " + PPM::envflags + " " + lt + " -shared -Wl,-rpath='$ORIGIN' -fPIC -o " + out + " " + filenames + " " + cpp_flags_ + " " + c_flags_);
   }
   if (st.code != 0) {
     std::cerr << st.data << std::endl;
