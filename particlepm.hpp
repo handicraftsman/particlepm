@@ -18,6 +18,7 @@ namespace PPM {
   extern bool dev;
   extern int fetched;
   extern std::string dist_dir;
+  extern std::set<std::string> libs;
 
   /*
    * Declarations

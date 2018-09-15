@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-project(ParticlePM VERSION 0.1.0 LANGUAGES CXX)
+project(ParticlePM VERSION 0.1.2 LANGUAGES CXX)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX /usr/ CACHE PATH "Default install prefix" FORCE)
@@ -11,6 +11,8 @@ endif()
 
 set(CMAKE_CXX_STANDARD 17)
 
+find_package(Boost 1.65 REQUIRED COMPONENTS program_options)
+
 include_directories(${CMAKE_CURRENT_LIST_DIR})
 
 add_library(libparticlepm SHARED ${CMAKE_CURRENT_LIST_DIR}/particlepm.cpp)
@@ -18,7 +20,8 @@ set_target_properties(libparticlepm PROPERTIES OUTPUT_NAME particlepm)
 target_link_libraries(libparticlepm dl)
 
 add_executable(particlepm ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
-target_link_libraries(particlepm libparticlepm dl)
+target_link_libraries(particlepm libparticlepm dl ${Boost_LIBRARIES})
+target_include_directories(particlepm PRIVATE ${Boost_INCLUDE_DIRS})
 
 install(
   TARGETS libparticlepm particlepm

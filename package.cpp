@@ -4,10 +4,12 @@ using namespace PPM::Utils;
 
 PPM_PACKAGE(p) {
   p->name("particlepm");
-  p->version(PPM::Version("v0.1.1"));
+  p->version(PPM::Version("v0.1.2"));
   p->description("A package manager and build system for C/++ applications and libraries");
   p->github(PPM::GitHub("handicraftsman", "particlepm"));
   p->license(PPM::License("MIT", "https://github.com/handicraftsman/particlepm/blob/master/LICENSE.txt"));
+
+  PPM::libs.insert("boost_program_options");
 
   // you can use
   //    p->git_repo(user, repo, selectors?)
@@ -39,6 +41,7 @@ PPM_PACKAGE(p) {
       ("-L" + PPM::dist_dir),
 
       "-lparticlepm",
+      "-lboost_program_options",
 
       ("-I" + p->pkg_dir())
     })

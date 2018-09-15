@@ -27,6 +27,7 @@ using namespace PPM::Utils;
 bool PPM::dev = false;
 int PPM::fetched = 0;
 std::string PPM::dist_dir = PPM::Utils::to_path(std::vector<std::string>{ "dist" });
+std::set<std::string> PPM::libs;
 
 std::string PPM_CC = "cc";
 std::string PPM_CXX = "c++";
@@ -275,7 +276,7 @@ void PPM::GitHub::fetch() {
   b = "v" + std::to_string(v.vmajor()) + "." + std::to_string(v.vminor()) + "." + std::to_string(v.vpatch());
 
   PPM::Utils::exec("git checkout " + b);
-  PPM::Utils::exec("git submodule update --recursive --remote");
+  PPM::Utils::exec("git submodule update --init --recursive");
   PPM::Utils::chdir(p);
 
   std::string ppath = dir() + "/package.cpp";
