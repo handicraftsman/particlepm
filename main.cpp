@@ -207,10 +207,11 @@ int main(int argc, char** argv) {
     std::cerr << global << std::endl;
 
     std::cerr << "Available subcommands: " << std::endl;
-    std::cerr << "  build     - build all packages in the workspace" << std::endl;
-    std::cerr << "  build-dev - build all packages in debug mode" << std::endl;
-    std::cerr << "  cp-libs   - copy all libraries specified in packages into the dist directory" << std::endl;
-    std::cerr << "  fetch     - fetch all packages specified in your manifest recursively" << std::endl;
+    std::cerr << "  build       - build all packages in the workspace" << std::endl;
+    std::cerr << "  build-dev   - build all packages in debug mode" << std::endl;
+    std::cerr << "  cp-libs     - copy all libraries specified in packages into the dist directory" << std::endl;
+    std::cerr << "  cp-libs-dev - same as cp-libs, but in development mode" << std::endl;
+    std::cerr << "  fetch       - fetch all packages specified in your manifest recursively" << std::endl;
 
     exit(2);
   };
