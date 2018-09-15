@@ -21,6 +21,8 @@ PPM_PACKAGE(p) {
   p->github(PPM::GitHub("handicraftsman", "particlepm"));
   p->license(PPM::License("MIT", "https://github.com/handicraftsman/particlepm/blob/master/LICENSE.txt"));
 
+  PM::libs.insert("boost_program_options");
+
   // you can use
   //    p->git_repo(user, repo, selectors?)
   // or p->github_repo(name, url, selectors?)
