@@ -237,6 +237,9 @@ int main(int argc, char** argv) {
     build(PPM::Package::from_path("./package.cpp", "./"));
   } else if (cmd == "cp-libs") {
     cp_libs(PPM::Package::from_path("./package.cpp", "./"));
+  } else if (cmd == "cp-libs-dev") {
+    PPM::dev = true;
+    cp_libs(PPM::Package::from_path("./package.cpp", "./"));
   } else if (cmd == "fetch") {
     fetch(PPM::Package::from_path("./package.cpp", "./"));
   } else if (cmd == "dummy") {
