@@ -3,6 +3,9 @@
 #include "target.hpp"
 
 #include <functional>
+#include <mutex>
+#include <queue>
+#include <thread>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
@@ -74,9 +77,9 @@ void PPM::Target::build() {
     return false;
   };
 
-  for (PPM::FilePtr file : files_) {
+  auto runner = [&] (PPM::FilePtr file) {
     if (file->built) {
-      continue;
+      return;
     }
     file->built = true;
     auto do_build = [&] () {
@@ -114,6 +117,36 @@ void PPM::Target::build() {
     } else {
       do_build();
     }
+  };
+
+  std::queue<PPM::FilePtr> q;
+  std::mutex qm;
+  std::vector<std::thread> threads;
+  unsigned n = std::thread::hardware_concurrency();
+
+  auto thread_runner = [&] () {
+    while (!q.empty()) {
+      PPM::FilePtr f;
+      {
+        std::lock_guard<std::mutex> ql(qm);
+        if (q.empty()) break;
+        f = q.front();
+        q.pop();
+      }
+      runner(f);
+    }
+  };
+
+  for (int i = 0; i < n; ++i) {
+    threads.push_back(std::thread(thread_runner));
+  }
+
+  for (PPM::FilePtr file : files_) {
+    q.push(file);
+  }
+
+  for (std::thread& thr : threads) {
+    thr.join();
   }
 
   std::string compiler = has_cpp ? PPM_CXX : PPM_CC;
