@@ -31,6 +31,8 @@ void PPM::Target::build() {
 
   std::cerr << "Building " << name() << "(" << (int) type_ << ")" << std::endl;
 
+  std::string dbg = PPM::dev ? "-g -ggdb" : "";
+
   for (PPM::FilePtr file : files_) {
     if (file->built) {
       continue;
@@ -52,7 +54,7 @@ void PPM::Target::build() {
         flags = cpp_flags_;
         std = cpp_;
       }
-      PPM::Utils::ExecStatus st = PPM::Utils::exec(file->compiler + " " + PPM::envflags + " " + flags + " -Wl,-rpath='$ORIGIN' -fPIC -std=" + std + " -c " + file->ifile + " -o " + file->ofile);
+      PPM::Utils::ExecStatus st = PPM::Utils::exec(file->compiler + " " + dbg + " " + PPM::envflags + " " + flags + " -Wl,-rpath='$ORIGIN' -fPIC -std=" + std + " -c " + file->ifile + " -o " + file->ofile);
       if (st.code != 0) {
         std::cerr << st.data << std::endl;
         ::exit(st.code);
@@ -76,7 +78,6 @@ void PPM::Target::build() {
   PPM::Utils::mkdir(PPM::dist_dir);
   std::string out = PPM::Utils::to_path(std::vector<std::string>{ "dist", ((type_ == PPM::Target::Type::Executable) ? name() : ("lib" + name() + ".so")) }); 
   std::string filenames = "";
-  std::string dbg = PPM::dev ? "-g -ggdb" : "";
   for (PPM::FilePtr file : files_) {
     filenames += (" " + file->ofile);
   }
