@@ -4,12 +4,13 @@ using namespace PPM::Utils;
 
 PPM_PACKAGE(p) {
   p->name("particlepm");
-  p->version(PPM::Version("v0.1.5"));
+  p->version(PPM::Version("v0.1.6"));
   p->description("A package manager and build system for C/++ applications and libraries");
   p->github(PPM::GitHub("handicraftsman", "particlepm"));
   p->license(PPM::License("MIT", "https://github.com/handicraftsman/particlepm/blob/master/LICENSE.txt"));
 
   PPM::libs.insert("boost_program_options");
+  PPM::libs.insert("boost_regex");
 
   // you can use
   //    p->git_repo(user, repo, selectors?)
@@ -37,6 +38,8 @@ PPM_PACKAGE(p) {
   lib->cpp_flags(
     flagcat({
       "-ldl",
+
+      "-lboost_regex",
 
       ("-I" + p->pkg_dir())
     })

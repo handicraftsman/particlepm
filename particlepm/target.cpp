@@ -2,6 +2,11 @@
 
 #include "target.hpp"
 
+#include <functional>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/regex.hpp>
+
 PPM::Target::Target(const std::string& name, const std::string& dir, PPM::Target::Type type)
 : marked(false)
 , has_cpp(false)
@@ -32,6 +37,42 @@ void PPM::Target::build() {
   std::cerr << "Building " << name() << "(" << (int) type_ << ")" << std::endl;
 
   std::string dbg = PPM::dev ? "-g -ggdb" : "";
+
+  auto has_updated_headers = [&] (const std::string& compiler, const std::string& ifile, const std::string& ofile, std::function<void()> do_build) -> bool {
+    std::string flags;
+    std::string std;
+    if (compiler == PPM_CC) {
+      flags = c_flags_;
+      std = c_;
+    } else if (compiler == PPM_CXX) {
+      flags = cpp_flags_;
+      std = cpp_;
+    }
+
+    PPM::Utils::ExecStatus st = PPM::Utils::exec(compiler + " " + dbg + " " + PPM::envflags + " " + flags + " -fPIC -std=" + std + " -M " + ifile);
+    if (st.code != 0) {
+      std::cerr << st.data << std::endl;
+      exit(1);
+    }
+    std::vector<std::string> files;
+    boost::algorithm::split_regex(files, st.data, boost::regex("[\\\\\\r\\n\\s]+"));
+    files.erase(files.begin(), files.begin() + 2);
+
+    for (const std::string& file : files) {
+      if (file.empty()) continue;
+
+      if (access(ofile.c_str(), 0) == 0) {
+        struct stat a, b;
+        ::stat(file.c_str(), &a);
+        ::stat(ofile.c_str(), &b);
+        if (a.st_mtime > b.st_mtime) {
+          do_build();
+          return true;
+        }
+      }
+    }
+    return false;
+  };
 
   for (PPM::FilePtr file : files_) {
     if (file->built) {
@@ -68,7 +109,8 @@ void PPM::Target::build() {
       ::stat(file->ofile.c_str(), &b);
       if (a.st_mtime > b.st_mtime) {
         do_build();
-      }
+      } else if (has_updated_headers(file->compiler, file->ifile, file->ofile, do_build)) {}
+    } else if (has_updated_headers(file->compiler, file->ifile, file->ofile, do_build)) {
     } else {
       do_build();
     }
