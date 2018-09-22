@@ -6,8 +6,8 @@ PPM_PACKAGE(p) {
   p->name("particlepm");
   p->version(PPM::Version("v0.1.7"));
   p->description("A package manager and build system for C/++ applications and libraries");
-  p->github(PPM::GitHub("handicraftsman", "particlepm"));
-  p->license(PPM::License("MIT", "https://github.com/handicraftsman/particlepm/blob/master/LICENSE.txt"));
+  p->github(PPM::GitHub("particletk", "particlepm"));
+  p->license(PPM::License("MIT", "https://github.com/particletk/particlepm/blob/master/LICENSE.txt"));
 
   PPM::libs.insert("boost_program_options");
   PPM::libs.insert("boost_regex");
