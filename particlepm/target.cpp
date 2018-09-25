@@ -106,7 +106,9 @@ void PPM::Target::build() {
 
       PPM::Utils::chdir(p);
     };
-    if (::access(file->ofile.c_str(), 0) == 0) {
+    if (::access(file->ofile.c_str(), 0) != 0) {
+      do_build();
+    } else if (::access(file->ofile.c_str(), 0) == 0) {
       struct stat a, b;
       ::stat(file->ifile.c_str(), &a);
       ::stat(file->ofile.c_str(), &b);
